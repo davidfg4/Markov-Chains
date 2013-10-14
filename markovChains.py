@@ -1,4 +1,8 @@
+#!/usr/bin/env python3.3
+
 import cgi
+import configparser
+import pymysql # https://github.com/PyMySQL/PyMySQL/
 import sys
 
 """
@@ -7,6 +11,9 @@ This file contains helper functions that are common to all pages of the webapp.
 It should contain functions to do all database calls, and return only valid
 python objects and data structures.
 """
+
+# Global variables:
+conn = None
 
 # -----------------------------------------------------------------------------
 # Begin HTML functions
@@ -35,8 +42,18 @@ def printFooter():
 # -----------------------------------------------------------------------------
 
 def initdb():
-    # connect to the database
-    pass
+    global conn
+    config = configparser.ConfigParser()
+    config.read("markovChains.cfg")
+    host = config['db']['host']
+    database = config['db']['database']
+    username = config['db']['username']
+    password = config['db']['password']
+    conn = pymysql.connect(host=host,
+        user=username,
+        passwd=password,
+        db=database)
+    conn.close()
 
 # -----------------------------------------------------------------------------
 # End database functions

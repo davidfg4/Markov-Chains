@@ -7,7 +7,18 @@ A webserver that can execute python as a cgi script.
 In apache this probably involves using "Options +ExecCGI" in either a .htaccess
 file, or the main site config file in a <Directory> section.
 
-A sql server will be required at some point, but not yet.
+Python 3.3
+
+PyMYSQL - https://github.com/PyMySQL/PyMySQL/
+
+A MySQL database is required, here are the basics of setting up a user and database:
+```
+mysql> CREATE DATABASE markov;
+mysql> CREATE USER 'markov'@'localhost' IDENTIFIED BY '';
+mysql> grant all privileges on markov.* to markov@localhost ;
+```
+
+Put the host, database, username, and password for mysql in markovChains.cfg.
 
 Architecture
 ------------
