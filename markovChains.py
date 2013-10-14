@@ -115,10 +115,16 @@ def check_credentials(user, password):
 def create_user(user, password):
     c = conn.cursor()
     hashed = bcrypt.hashpw(password, bcrypt.gensalt(12))
-    c.execute("DELETE FROM users WHERE username = %s", (user, ))
-    c.execute("INSERT INTO users VALUES (%s, %s)", (user, hashed))
-    conn.commit()
-    c.close()
+    # c.execute("DELETE FROM users WHERE username = %s", (user, ))
+    try:
+        c.execute("INSERT INTO users VALUES (%s, %s)", (user, hashed))
+    except pymysql.err.IntegrityError:
+        # It's likely the user already exists
+        return False
+    finally:
+        conn.commit()
+        c.close()
+    return True
 
 # -----------------------------------------------------------------------------
 # End database functions
