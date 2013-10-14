@@ -35,6 +35,19 @@ def printFooter():
     print("""</div>
 </body>""", end="")
 
+def redirect(loc):
+    print("""Content-Type: text/html
+
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="refresh" content="0; url=""" + loc + """">
+</head>
+<body>
+<a href='""" + loc + """'> Please click here if you are not redirected.<a/>
+</body>
+</html>""")
+
 
 # -----------------------------------------------------------------------------
 # End HTML functions
