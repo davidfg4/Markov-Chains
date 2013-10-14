@@ -11,6 +11,10 @@ Python 3.3
 
 PyMYSQL - https://github.com/PyMySQL/PyMySQL/
 
+py-bcrypt 0.4 - http://www.mindrot.org/projects/py-bcrypt/
+This might exist in you package manager as python3-bcrypt.
+If installing from source, might need this version instead: https://github.com/wcdolphin/python-bcrypt
+
 A MySQL database is required, here are the basics of setting up a user and database:
 ```
 mysql> CREATE DATABASE markov;
