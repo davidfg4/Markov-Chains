@@ -3,7 +3,10 @@
 import bcrypt
 import cgi
 import configparser
+import http.cookies
 import pymysql # https://github.com/PyMySQL/PyMySQL/
+import random
+import string
 import sys
 
 """
@@ -57,7 +60,7 @@ def redirect(loc):
 
 # Increment this number whenever the schema is changed, and databases will
 # automatically remake themselves. (Warning: existing data will be deleted.)
-db_version = 5
+db_version = 8
 
 def initdb():
     global conn
@@ -90,9 +93,9 @@ def create_db():
     c.execute("CREATE TABLE info (`key` VARCHAR(255) PRIMARY KEY, value TEXT)")
     c.execute("INSERT INTO info VALUES ('db_version', %s)", (db_version, ))
     c.execute("DROP TABLE IF EXISTS users")
-    c.execute("CREATE TABLE users (username VARCHAR(255) PRIMARY KEY, password TEXT)")
+    c.execute("CREATE TABLE users (username VARCHAR(255) PRIMARY KEY, password TEXT, cookie TEXT, cookie_expire DATETIME)")
     # blank password
-    c.execute("INSERT INTO users VALUES ('test', '$2a$12$6J4OyHUwI4Z8xAqslIpxLeFnQmuGkf700V7Rm9kMGpmMeW2VXHJkK')")
+    c.execute("INSERT INTO users VALUES ('test', '$2a$12$6J4OyHUwI4Z8xAqslIpxLeFnQmuGkf700V7Rm9kMGpmMeW2VXHJkK', '', NOW() + INTERVAL 1 DAY)")
     conn.commit()
     c.close()
     
@@ -107,10 +110,23 @@ def check_credentials(user, password):
     hashed = r[0]
     if bcrypt.hashpw(password, hashed) == hashed:
         # user exists, password is good
-        return True
+        cookie = randomCookie()
+        c = conn.cursor()
+        c.execute("UPDATE users SET cookie = %s, cookie_expire = NOW() + INTERVAL 1 WEEK WHERE username = %s", (cookie, user))
+        return cookie
     else:
         # user exists, password is bad
         return False
+
+def check_cookie(cookie):
+    c = conn.cursor()
+    c.execute("SELECT username FROM users WHERE cookie = %s AND cookie_expire > NOW()", (cookie, ))
+    r = c.fetchone()
+    c.close()
+    if r == None:
+        return False
+    else:
+        return r[0]
 
 def create_user(user, password):
     c = conn.cursor()
@@ -129,6 +145,10 @@ def create_user(user, password):
 # -----------------------------------------------------------------------------
 # End database functions
 # -----------------------------------------------------------------------------
+
+def randomCookie(length=40):
+    return "".join(random.choice(string.ascii_uppercase +\
+        string.ascii_lowercase + string.digits) for x in range(length))
 
 def init():
     initdb()
