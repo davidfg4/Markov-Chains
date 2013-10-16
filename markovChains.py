@@ -81,6 +81,8 @@ db_version = 8
 def initdb():
     global conn
     config = configparser.ConfigParser()
+    # Storing the cfg file in the web folder is not secure,
+    # don't do this on a real install.
     config.read("markovChains.cfg")
     host = config['db']['host']
     database = config['db']['database']
