@@ -38,8 +38,10 @@ def printFooter():
     print("""</div>
 </body>""", end="")
 
-def redirect(loc):
-    print("""Content-Type: text/html
+def redirect(loc, headers=""):
+    print("""Content-Type: text/html""")
+    print(headers)
+    print("""
 
 <!doctype html>
 <html>
@@ -110,10 +112,12 @@ def check_credentials(user, password):
     hashed = r[0]
     if bcrypt.hashpw(password, hashed) == hashed:
         # user exists, password is good
-        cookie = randomCookie()
+        session_id = randomCookie()
+        cookie = http.cookies.SimpleCookie()
+        cookie['session'] = session_id
         c = conn.cursor()
-        c.execute("UPDATE users SET cookie = %s, cookie_expire = NOW() + INTERVAL 1 WEEK WHERE username = %s", (cookie, user))
-        return cookie
+        c.execute("UPDATE users SET cookie = %s, cookie_expire = NOW() + INTERVAL 1 WEEK WHERE username = %s", (session_id, user))
+        return cookie.output()
     else:
         # user exists, password is bad
         return False

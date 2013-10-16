@@ -15,13 +15,15 @@ def main():
             password = form["password"].value
         else:
             password = ""
-        logged_in = markovChains.check_credentials(username, password)
+        cookie = markovChains.check_credentials(username, password)
+        if cookie:
+            logged_in = True
         if not logged_in:
             log_in_failure = True
     # Build the page
     if logged_in:
         # TODO: set cookie or something
-        markovChains.redirect("user.py")
+        markovChains.redirect("user.py", cookie)
     else:
         markovChains.printHeader()
         if log_in_failure:
