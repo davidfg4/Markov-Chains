@@ -20,6 +20,12 @@ def main():
             logged_in = True
         if not logged_in:
             log_in_failure = True
+    # Check if they were logged out
+    nologin = False
+    if "error" in form:
+        error = form['error'].value
+        if error == "nologin":
+            nologin = True
     # Build the page
     if logged_in:
         # TODO: set cookie or something
@@ -27,7 +33,9 @@ def main():
     else:
         markovChains.printHeader()
         if log_in_failure:
-            print("Invliad username or password, please try again.")
+            print("Invliad username or password, please try again.<br>")
+        if nologin:
+            print("You have been logged out, perheps your cookie expired.<br>")
         print("""<form method="post" action="index.py">
 Name: <input type="text" size="20" maxlength="40" name="name"> <br />
 Password: <input type="password" size="20" maxlength="40" name="password"> <br />

@@ -4,6 +4,7 @@ import bcrypt
 import cgi
 import configparser
 import http.cookies
+import os
 import pymysql # https://github.com/PyMySQL/PyMySQL/
 import random
 import string
@@ -22,6 +23,19 @@ conn = None
 # -----------------------------------------------------------------------------
 # Begin HTML functions
 # -----------------------------------------------------------------------------
+
+def check_browser_cookie(require_login=True):
+    cookie = []
+    if "HTTP_COOKIE" in os.environ:
+        cookie = http.cookies.SimpleCookie(os.environ["HTTP_COOKIE"])
+    if "session" in cookie:
+        user = check_cookie(cookie["session"].value)
+        if user:
+            return user
+    if not require_login:
+        return False
+    redirect("index.py?error=nologin")
+    sys.exit(0)
 
 def printHeader():
     print("""Content-Type: text/html

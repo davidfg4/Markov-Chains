@@ -5,8 +5,9 @@ import markovChains
 
 
 def main():
+    user = markovChains.check_browser_cookie()
     markovChains.printHeader()
-    print("""You are logged in!""")
+    print("You are logged in as " + user)
     markovChains.printFooter()
 
 
