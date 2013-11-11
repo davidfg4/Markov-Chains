@@ -153,7 +153,7 @@ def create_user(user, password):
     hashed = bcrypt.hashpw(password, bcrypt.gensalt(12))
     # c.execute("DELETE FROM users WHERE username = %s", (user, ))
     try:
-        c.execute("INSERT INTO users VALUES (%s, %s)", (user, hashed))
+        c.execute("INSERT INTO users VALUES (%s, %s, '', NOW())", (user, hashed))
     except pymysql.err.IntegrityError:
         # It's likely the user already exists
         return False

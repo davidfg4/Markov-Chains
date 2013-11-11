@@ -28,7 +28,6 @@ def main():
             nologin = True
     # Build the page
     if logged_in:
-        # TODO: set cookie or something
         markovChains.redirect("user.py", cookie)
     else:
         markovChains.printHeader()
