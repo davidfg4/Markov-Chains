@@ -44,6 +44,8 @@ def printHeader():
 <html>
 <head>
 <title></title>
+<link rel="stylesheet" type="text/css" href="cssreset.css" />
+<link rel="stylesheet" type="text/css" href="stylesheet.css" />
 </head>
 <body>
 <div id="main">""")

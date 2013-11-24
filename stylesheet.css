@@ -1,0 +1,21 @@
+html {
+    background-color: #9DF49D;
+}
+#main {
+    width: 800px;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 15px;
+    padding: 20px;
+    background-color: white;
+}
+
+table {
+    border-collapse: collapse;
+}
+th, td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: gray;
+}
