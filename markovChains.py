@@ -76,7 +76,7 @@ def redirect(loc, headers=""):
 
 # Increment this number whenever the schema is changed, and databases will
 # automatically remake themselves. (Warning: existing data will be deleted.)
-db_version = 8
+db_version = 13
 
 def initdb():
     global conn
@@ -111,9 +111,21 @@ def create_db():
     c.execute("CREATE TABLE info (`key` VARCHAR(255) PRIMARY KEY, value TEXT)")
     c.execute("INSERT INTO info VALUES ('db_version', %s)", (db_version, ))
     c.execute("DROP TABLE IF EXISTS users")
-    c.execute("CREATE TABLE users (username VARCHAR(255) PRIMARY KEY, password TEXT, cookie TEXT, cookie_expire DATETIME)")
+    c.execute("""CREATE TABLE users
+        (username VARCHAR(255) PRIMARY KEY,
+        password TEXT,
+        cookie TEXT,
+        cookie_expire DATETIME)""")
     # blank password
     c.execute("INSERT INTO users VALUES ('test', '$2a$12$6J4OyHUwI4Z8xAqslIpxLeFnQmuGkf700V7Rm9kMGpmMeW2VXHJkK', '', NOW() + INTERVAL 1 DAY)")
+    c.execute("DROP TABLE IF EXISTS blocks")
+    c.execute("""CREATE TABLE blocks
+        (id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255),
+        user VARCHAR(255),
+        original_text TEXT,
+        source_url TEXT,
+        FOREIGN KEY (user) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE)""")
     conn.commit()
     c.close()
     
