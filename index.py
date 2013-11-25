@@ -36,8 +36,11 @@ def main():
         if nologin:
             print("You have been logged out, perheps your cookie expired.<br>")
         print("""<form method="post" action="index.py">
-Name: <input type="text" size="20" maxlength="40" name="name"> <br />
-Password: <input type="password" size="20" maxlength="40" name="password"> <br />
+Name:<br />
+<input type="text" size="20" maxlength="40" name="name"> <br />
+Password:<br />
+<input type="password" size="20" maxlength="40" name="password"> <br />
+<br />
 <input type="submit" value="Log in">
 </form>
 <br />

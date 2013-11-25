@@ -96,7 +96,7 @@ def initdb():
         db=database)
     c = conn.cursor()
     try:
-        c.execute ("SELECT value FROM info WHERE `key` = 'db_version'")
+        c.execute("SELECT value FROM info WHERE `key` = 'db_version'")
         r = int(c.fetchall()[0][0])
         if r < db_version:
             #print("DB is old, remaking")
@@ -175,6 +175,20 @@ def create_user(user, password):
         conn.commit()
         c.close()
     return True
+
+def create_block(name, user, text, url=None):
+    c = conn.cursor()
+    c.execute("INSERT INTO blocks VALUES (null, %s, %s, %s, %s)", (name, user, text, url))
+    conn.commit()
+    c.close()
+
+def get_blocks(user):
+    c = conn.cursor(pymysql.cursors.DictCursor)
+    c.execute("SELECT * FROM blocks WHERE user = %s", (user, ))
+    blocks = c.fetchall()
+    conn.commit()
+    c.close()
+    return blocks
 
 # -----------------------------------------------------------------------------
 # End database functions
