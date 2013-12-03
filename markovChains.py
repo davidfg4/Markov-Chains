@@ -78,7 +78,7 @@ def redirect(loc, headers=""):
 
 # Increment this number whenever the schema is changed, and databases will
 # automatically remake themselves. (Warning: existing data will be deleted.)
-db_version = 13
+db_version = 15
 
 def initdb():
     global conn
@@ -128,6 +128,19 @@ def create_db():
         original_text TEXT,
         source_url TEXT,
         FOREIGN KEY (user) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE)""")
+    c.execute("DROP TABLE IF EXISTS chunks")
+    c.execute("""CREATE TABLE chunks
+        (block_id INT,
+        context_length INT,
+        context VARCHAR(255),
+        next VARCHAR(255),
+        FOREIGN KEY (block_id) REFERENCES block(id) ON DELETE CASCADE ON UPDATE CASCADE)""")
+    c.execute("DROP TABLE IF EXISTS generated_text")
+    c.execute("""CREATE TABLE generated_text
+        (block_id INT,
+        date DATETIME,
+        text TEXT,
+        FOREIGN KEY (block_id) REFERENCES block(id) ON DELETE CASCADE ON UPDATE CASCADE)""")
     conn.commit()
     c.close()
     
@@ -179,6 +192,14 @@ def create_user(user, password):
 def create_block(name, user, text, url=None):
     c = conn.cursor()
     c.execute("INSERT INTO blocks VALUES (null, %s, %s, %s, %s)", (name, user, text, url))
+    c.execute("SELECT max(id) FROM blocks")
+    id = c.fetchone()[0]
+    for context_length in range(1, 11):
+        for i in range(context_length, len(text)):
+            c.execute("INSERT INTO chunks VALUES (%s, %s, %s, %s)", (id, context_length, text[i-context_length:i], text[i]))
+    words = text.split()
+    for i in range(1, len(words)):
+        c.execute("INSERT INTO chunks VALUES (%s, %s, %s, %s)", (id, 0, words[i-1], words[i]))
     conn.commit()
     c.close()
 
