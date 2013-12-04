@@ -15,9 +15,12 @@ def main():
     print("<table>")
     print("<tr><th>Name</th><th>Actions</th></tr>")
     for block in blocks:
-        print("<tr><td>" + block['name'] + "</td><td><a href="">Nothing yet</a></td></tr>")
+        print("<tr><td>" + block['name'] + '</td><td><a href="create_chain.py?id=' + str(block['id']) + '">Create chain</a></td></tr>')
     print("</table>")
-    print('<a href="new_block.py">Create a new block</a>')
+    print("<br />")
+    print('<a href="new_block.py">Create a new block from text</a>')
+    print("<br />")
+    print('<a href="new_block_url.py">Create a new block from a webpage</a>')
     markovChains.printFooter()
 
 

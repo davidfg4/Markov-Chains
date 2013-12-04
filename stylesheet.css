@@ -20,3 +20,7 @@ th, td {
     border-color: gray;
     padding: 3px;
 }
+h1 {
+    font-size: xx-large;
+    font-weight: bold;
+}

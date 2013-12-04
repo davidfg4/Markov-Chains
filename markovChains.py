@@ -43,12 +43,16 @@ def printHeader():
 <!doctype html>
 <html>
 <head>
-<title></title>
+<title>Markov Chains</title>
 <link rel="stylesheet" type="text/css" href="cssreset.css" />
 <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 </head>
 <body>
-<div id="main">""")
+<div id="main">
+<center><h1>Markov Chains</h1><a href="user.py">User page</a></center>
+<hr>
+<br />
+""")
 
 def printFooter():
     print("""</div>
@@ -78,7 +82,7 @@ def redirect(loc, headers=""):
 
 # Increment this number whenever the schema is changed, and databases will
 # automatically remake themselves. (Warning: existing data will be deleted.)
-db_version = 15
+db_version = 19
 
 def initdb():
     global conn
@@ -125,21 +129,22 @@ def create_db():
         (id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255),
         user VARCHAR(255),
-        original_text TEXT,
+        original_text LONGTEXT,
         source_url TEXT,
         FOREIGN KEY (user) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE)""")
     c.execute("DROP TABLE IF EXISTS chunks")
     c.execute("""CREATE TABLE chunks
         (block_id INT,
         context_length INT,
-        context VARCHAR(255),
-        next VARCHAR(255),
+        context VARCHAR(25),
+        next VARCHAR(25),
+        INDEX (context),
         FOREIGN KEY (block_id) REFERENCES block(id) ON DELETE CASCADE ON UPDATE CASCADE)""")
     c.execute("DROP TABLE IF EXISTS generated_text")
     c.execute("""CREATE TABLE generated_text
         (block_id INT,
         date DATETIME,
-        text TEXT,
+        text LONGTEXT,
         FOREIGN KEY (block_id) REFERENCES block(id) ON DELETE CASCADE ON UPDATE CASCADE)""")
     conn.commit()
     c.close()
@@ -194,22 +199,64 @@ def create_block(name, user, text, url=None):
     c.execute("INSERT INTO blocks VALUES (null, %s, %s, %s, %s)", (name, user, text, url))
     c.execute("SELECT max(id) FROM blocks")
     id = c.fetchone()[0]
-    for context_length in range(1, 11):
-        for i in range(context_length, len(text)):
-            c.execute("INSERT INTO chunks VALUES (%s, %s, %s, %s)", (id, context_length, text[i-context_length:i], text[i]))
+    if False:
+        # This doesn't work for some reason :(
+        for context_length in range(1, 11):
+            for i in range(context_length, len(text)):
+                try:
+                    context = text[i-context_length:i]
+                    string = str(text[i])
+                    c.execute("INSERT INTO chunks VALUES (%s, %s, %s, %s)", (id, context_length, context, string))
+                except:
+                    pass
     words = text.split()
     for i in range(1, len(words)):
-        c.execute("INSERT INTO chunks VALUES (%s, %s, %s, %s)", (id, 0, words[i-1], words[i]))
+        try:
+            context = words[i-1]
+            string = words[i]
+            c.execute("INSERT INTO chunks VALUES (%s, %s, %s, %s)", (id, 0, context, string))
+        except:
+            pass
     conn.commit()
     c.close()
 
-def get_blocks(user):
+def get_blocks(user, id=None):
     c = conn.cursor(pymysql.cursors.DictCursor)
-    c.execute("SELECT * FROM blocks WHERE user = %s", (user, ))
+    if id:
+        c.execute("SELECT * FROM blocks WHERE user = %s AND id = %s", (user, id))
+    else:
+        c.execute("SELECT * FROM blocks WHERE user = %s", (user, ))
     blocks = c.fetchall()
     conn.commit()
     c.close()
     return blocks
+
+def create_chain(id, context_length, length):
+    context_length = int(context_length)
+    c = conn.cursor(pymysql.cursors.DictCursor)
+    text = ""
+    if context_length == 0:
+        text = "test"
+        c.execute("SELECT * FROM chunks WHERE block_id = %s ORDER BY RAND() LIMIT 1", (id, ))
+        context = c.fetchone()['next']
+        text = context
+        for i in range(length):
+            c.execute("SELECT * FROM chunks WHERE block_id = %s AND context = %s", (id, context))
+            words = c.fetchall()
+            if len(words) < 1:
+                c.execute("SELECT * FROM chunks WHERE block_id = %s ORDER BY RAND() LIMIT 1", (id, ))
+                context = c.fetchone()['next']
+            else:
+                context = random.choice(words)['next']
+            text += context + " "
+    else:
+        # TODO: implement
+        for i in range(length):
+            pass
+    # TODO: add text to generated_text table
+    conn.commit()
+    c.close()
+    return text.encode('ascii', 'ignore')[2:-1]
 
 # -----------------------------------------------------------------------------
 # End database functions
